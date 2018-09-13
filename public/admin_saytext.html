@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ouija</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.2/TweenLite.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.2/TimelineLite.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/nexmo-stitch@2.1.0/dist/conversationClient.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css">
+</head>
+<style>
+  body {
+    background: black;
+    color: white;
+    font-family: 'Open Sans', sans-serif;
+  }
+  #canvasDiv {
+    width: 1250px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  a, a:visited {
+    color: white;
+  }
+  .toast-success {
+    background-color: #A9A9A9;
+  }
+</style>
+<body>
+<div id="canvasDiv"><canvas id="myCanvas" width="1250" height="841"></canvas></div>
+<h3 align="center">Text A Question</h3>
+<h1 align="center">120-3456-9996</h1>
+<audio id="audio">
+  <source>
+</audio>
+
+</body>
+<script src="/js/messaging2.js"></script>
+<script>
+var canvas = document.getElementById('myCanvas');
+var context = canvas.getContext('2d');
+
+var ouijaLetters = {
+  A: { x: 90, y: 330 },
+  B: { x: 185, y: 280 },
+  C: { x: 260, y: 240 },
+  D: { x: 335, y: 220 },
+  E: { x: 410, y: 210 },
+  F: { x: 490, y: 200 },
+  G: { x: 570, y: 190 },
+  H: { x: 650, y: 200 },
+  I: { x: 740, y: 200 },
+  J: { x: 800, y: 210 },
+  K: { x: 890, y: 240 },
+  L: { x: 960, y: 280 },
+  M: { x: 1050, y: 300 },
+
+  N: { x: 90, y: 480 },
+  O: { x: 180, y: 430 },
+  P: { x: 240, y: 400 },
+  Q: { x: 320, y: 370 },
+  R: { x: 400, y: 350 },
+  S: { x: 480, y: 330 },
+  T: { x: 560, y: 310 },
+  U: { x: 640, y: 320 },
+  V: { x: 725, y: 330 },
+  W: { x: 820, y: 360 },
+  X: { x: 910, y: 390 },
+  Y: { x: 990, y: 430 },
+  Z: { x: 1050, y: 480 },
+
+  '1': { x: 230, y: 550},
+  '2': { x: 290, y: 550},
+  '3': { x: 365, y: 550},
+  '4': { x: 445, y: 550},
+  '5': { x: 520, y: 550},
+  '6': { x: 600, y: 550},
+  '7': { x: 670, y: 550},
+  '8': { x: 750, y: 550},
+  '9': { x: 830, y: 550},
+  '0': { x: 910, y: 550},
+
+  '_': { x: 570, y: 420},
+
+  GB: { x: 550, y: 650}
+};
+
+var ouijaBoard = new Image();
+ouijaBoard.src = 'https://tokboard.com/images/ouija.jpeg';
+
+var planchette = {
+  x: ouijaLetters.GB.x,
+  y: ouijaLetters.GB.y,
+  img: new Image(),
+  registration: {
+    x: 54,
+    y: 73
+  },
+  rotation: 0
+};
+
+planchette.img.src = 'http://i67.tinypic.com/2b6u5e.jpg';
+planchette.x = ouijaLetters.GB.x;
+planchette.y = ouijaLetters.GB.y;
+
+window.onload = function() {
+  context.drawImage(ouijaBoard, 0, 0, 1250, 841);
+  context.drawImage(planchette.img, planchette.x, planchette.y, 158, 215);
+};
+
+function draw() {
+  window.requestAnimationFrame(draw);
+  context.save();
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(ouijaBoard, 0, 0, 1250, 841);
+  //context.translate(planchette.registration.x, planchette.registration.y);
+  //context.rotate(planchette.rotation * Math.PI / 180);
+  context.drawImage(planchette.img, planchette.x, planchette.y, 158, 216);
+  context.restore();
+};
+
+window.requestAnimationFrame(draw);
+
+function renderOuijaAnswerDebug(debugX, debugY) {
+    var tl = new TimelineLite({
+      repeat: 1,
+      repeatDelay: 3
+    });
+
+    tl.add(TweenLite.to(planchette, 1, {
+      ease: Power2.easeInOut,
+      x: debugX,
+      y: debugY
+    }));
+
+    tl.play();
+}
+
+function renderOuijaAnswer(inputTextValue, cb) {
+    var currentOutputText = '';
+    var currentIndex = 0;
+    inputTextValue = inputTextValue.replace(/\s/g, '_');
+
+    var tl = new TimelineLite({
+      repeat: 1,
+      repeatDelay: 3
+    });
+
+    var prevLetter;
+    for (i = 0; i < inputTextValue.length; i++) {
+        var letter = inputTextValue[i].toUpperCase();
+
+        if (prevLetter === letter) {
+          console.log(prevLetter);
+          tl.add(TweenLite.to(planchette, 1.5, {
+            ease: Power2.easeInOut,
+            bezier: {
+              curviness: 1.5,
+              values: [{
+                x: ouijaLetters[letter].x + 15,
+                y: ouijaLetters[letter].y + 15
+              }, {
+                x: ouijaLetters[letter].x + 0,
+                y: ouijaLetters[letter].y + 30
+              }, {
+                x: ouijaLetters[letter].x + -15,
+                y: ouijaLetters[letter].y +  15
+              }, {
+                x: ouijaLetters[letter].x + 0,
+                y: ouijaLetters[letter].y + 0
+              }]
+            }
+          }));
+        }
+        else {
+          tl.add(TweenLite.to(planchette, 1, {
+            ease: Power2.easeInOut,
+            x: ouijaLetters[letter].x,
+            y: ouijaLetters[letter].y
+          }));
+        }
+
+        prevLetter = letter;
+    }
+
+    tl.add(TweenLite.to(planchette, 1, {
+      ease: Power2.easeInOut,
+      x: ouijaLetters.GB.x,
+      y: ouijaLetters.GB.y
+    }));
+
+    // tl.eventCallback("onUpdate", function() {
+    //   currentOutputText += inputTextValue[currentIndex++];
+    //   toastr.clear();
+    //   toastr.success(currentOutputText, 'Answer From The Spirits:');
+    // });
+
+    timelinePromise(tl.play()).then(cb);
+}
+
+var timelinePromise = function(timeline) {
+   return new Promise(function(resolve) {
+      //alternate syntax for adding a callback
+      timeline.eventCallback("onComplete", function() {
+        // timeline.eventCallback("onUpdate", () => {});
+         resolve(true);
+      });
+   });
+}
+
+</script>
+</html>

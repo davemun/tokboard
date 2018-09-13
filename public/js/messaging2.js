@@ -41,16 +41,16 @@ class ChatApp {
       if (type == 'question' && !isRunning) {
         isRunning = true;
         renderOujaQuestion(storage[id].question, () => {
-          // conversation.media.sayText({
-          //   text: storage[id].question,
-          //   voice_name: voices[Math.floor(Math.random() * voices.length)]
-          // });
+          conversation.media.sayText({
+            text: storage[id].question,
+            voice_name: voices[Math.floor(Math.random() * voices.length)]
+          });
           renderOuijaAnswer(storage[id].answer || 'Reply hazy, try again', () => {
             toastr.success(storage[id].answer, 'Answer From The Spirits:');
-            // conversation.media.sayText({
-            //   text: storage[id].answer || 'Reply hazy, try again',
-            //   voice_name: 'Amy'
-            // });
+            conversation.media.sayText({
+              text: storage[id].answer || 'Reply hazy, try again',
+              voice_name: 'Amy'
+            });
             setTimeout(() => { isRunning = false; }, 500);
           });
         });
