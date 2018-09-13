@@ -45,14 +45,14 @@ class ChatApp {
             text: storage[id].question,
             voice_name: voices[Math.floor(Math.random() * voices.length)]
           });
-          setTimeout(() => renderOuijaAnswer(storage[id].answer || 'Reply hazy, try again', () => {
+          renderOuijaAnswer(storage[id].answer || 'Reply hazy, try again', () => {
             toastr.success(storage[id].answer, 'Answer From The Spirits:');
             conversation.media.sayText({
               text: storage[id].answer || 'Reply hazy, try again',
               voice_name: 'Amy'
             });
-            isRunning = false;
-          }), 3000);
+            setTimeout(() => { isRunning = false; }, 500);
+          });
         });
       }
     });
