@@ -35,6 +35,7 @@ class ChatApp {
       const id = claims[0];
       const type = claims[1];
       const msg = claims[2];
+      console.log('msg received:' + msg);
       storage[id] = storage[id] || {};
       storage[id][type] = msg;
       if (type == 'question' && !isRunning) {
